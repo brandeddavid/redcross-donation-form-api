@@ -16,7 +16,7 @@ module.exports = {
 			user: "ubuntu",
 			host: "18.202.244.58",
 			ref: "origin/main",
-			repo: "git@github.com:brandeddavid/redcross-donation-form.git",
+			repo: "git@github.com:brandeddavid/redcross-donation-form-api.git",
 			path: "/home/ubuntu/api/",
 			"pre-deploy-local": "",
 			"post-deploy":
