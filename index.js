@@ -12,8 +12,14 @@ app.use(bodyParser.json());
 
 const corsOptions = {
 	AccessControlAllowOrigin: "*",
-	origin: "*",
+	origin: ["http:localhost:8800", "http://196.43.239.57:8800"],
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+	allowedHeaders: [
+		"Accept-Version",
+		"Authorization",
+		"Credentials",
+		"Content-Type",
+	],
 };
 app.use(cors(corsOptions));
 
