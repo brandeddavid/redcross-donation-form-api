@@ -111,6 +111,42 @@ app.post("/api/donate", (req, res) => {
 	});
 });
 
+app.get("/api/countries", (req, res) => {
+	const query = "SELECT * FROM country";
+
+	pool.getConnection((error, connection) => {
+		if (error) throw error;
+
+		connection.query(query, (error, data) => {
+			if (error) {
+				return res.json(error);
+			}
+
+			return res.json(data);
+		});
+
+		connection.release();
+	});
+});
+
+app.get("/api/counties", (req, res) => {
+	const query = "SELECT * FROM city";
+
+	pool.getConnection((error, connection) => {
+		if (error) throw error;
+
+		connection.query(query, (error, data) => {
+			if (error) {
+				return res.json(error);
+			}
+
+			return res.json(data);
+		});
+
+		connection.release();
+	});
+});
+
 app.listen(port, () => {
 	console.log("Connected to the server on port:", port);
 });
