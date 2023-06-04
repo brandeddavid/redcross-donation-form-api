@@ -124,15 +124,21 @@ app.post("/api/process-payment", (req, res) => {
 			domain,
 			transaction_trace_id,
 			message,
+			transaction_reference_id,
 		},
 	} = req;
+	const payment_reference = trace_id || transaction_trace_id;
+	const donation_id = Number(reference_id || transaction_reference_id);
+
 	const query = `UPDATE donation SET 
 		krc_reference = "${bill_reference_id}",
 		payment_body = "${message}",
 		amount = "${amount}",
-		payment_reference="${trace_id}",
-		gateway_payment_method = "${domain}"
-		WHERE donation_id="${reference_id}"
+		payment_reference="${payment_reference}",
+		gateway_payment_method = "${domain}",
+		payment_date = "${date}",
+		updated_at = "${date}"
+		WHERE donation_id="${donation_id}"
 	`;
 
 	pool.getConnection((error, connection) => {
