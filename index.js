@@ -175,7 +175,7 @@ app.get("/api/countries", (req, res) => {
 });
 
 app.get("/api/counties", (req, res) => {
-	const query = "SELECT * FROM city";
+	const query = "SELECT * FROM counties";
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
