@@ -96,7 +96,7 @@ app.post("/api/donate", (req, res) => {
 			paymentMethod,
 		},
 	} = req;
-	const query = `INSERT INTO donation (krc_reference, donor_type, first_name, last_name, company_name, phone, address, region, country, currency, amount, payment_method, donation_cause, payment_body, payment_reference, gateway_payment_method, updated_at) values ("test", "${donorType}", "${firstName}", "${lastName}", "${companyName}", "${phoneNumber}", "${address}", "${county}", "${country}", "${currency}", "${amount}", "${paymentMethod}", "${campaignId}", "test", "test","test", "${date}")`;
+	const query = `INSERT INTO donation (krc_reference, donor_type, first_name, last_name, company_name, phone, address, region, country, currency, amount, payment_method, donation_cause, payment_body, payment_reference, gateway_payment_method, updated_at) values ("", "${donorType}", "${firstName}", "${lastName}", "${companyName}", "${phoneNumber}", "${address}", "${county}", "${country}", "${currency}", "${amount}", "${paymentMethod}", "${campaignId}", "", "","", "${date}")`;
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
@@ -125,10 +125,13 @@ app.post("/api/process-payment", (req, res) => {
 			transaction_trace_id,
 			message,
 			transaction_reference_id,
+			orderReference,
 		},
 	} = req;
 	const payment_reference = trace_id || transaction_trace_id;
-	const donation_id = Number(reference_id || transaction_reference_id);
+	const donation_id = Number(
+		reference_id || transaction_reference_id || orderReference
+	);
 
 	const query = `UPDATE donation SET 
 		krc_reference = "${bill_reference_id}",
