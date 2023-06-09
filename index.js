@@ -3,7 +3,7 @@ import mysql from "mysql";
 import cors from "cors";
 import "dotenv/config";
 import bodyParser from "body-parser";
-import { DateTime, Settings } from "luxon";
+import { DateTime } from "luxon";
 
 const app = express();
 const port = 8800;
@@ -126,6 +126,7 @@ app.post("/api/process-payment", (req, res) => {
 			message,
 			transaction_reference_id,
 			orderReference,
+			status,
 		},
 	} = req;
 	const payment_reference = trace_id || transaction_trace_id;
@@ -133,16 +134,52 @@ app.post("/api/process-payment", (req, res) => {
 		reference_id || transaction_reference_id || orderReference
 	);
 
-	const query = `UPDATE donation SET 
+	const getQuery = (status) => {
+		if (status) {
+			return `UPDATE donation SET 
 		krc_reference = "${bill_reference_id}",
 		payment_body = "${message}",
 		amount = "${amount}",
 		payment_reference="${payment_reference}",
 		gateway_payment_method = "${domain}",
 		payment_date = "${date}",
-		updated_at = "${date}"
+		updated_at = "${date}",
+		payment_status = 1
 		WHERE donation_id="${donation_id}"
 	`;
+		}
+		return `UPDATE donation SET 
+		krc_reference = "${bill_reference_id}",
+		payment_body = "${message}",
+		amount = "${amount}",
+		payment_reference="${payment_reference}",
+		gateway_payment_method = "${domain}",
+		payment_date = "${date}",
+		updated_at = "${date}",
+		payment_status = -1
+		WHERE donation_id="${donation_id}"
+	`;
+	};
+
+	const query = getQuery(status);
+
+	pool.getConnection((error, connection) => {
+		if (error) throw error;
+
+		connection.query(query, (error, data) => {
+			if (error) {
+				return res.json(error);
+			}
+
+			return res.json(data);
+		});
+
+		connection.release();
+	});
+});
+
+app.get("/api/get-donation", (req, res) => {
+	const query = `SELECT * FROM donation WHERE donation_id = ${req.query.donationId}`;
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
