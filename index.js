@@ -119,20 +119,16 @@ app.post("/api/process-payment", (req, res) => {
 			reference_id,
 			bill_reference_id,
 			amount,
-			status_code,
 			trace_id,
 			domain,
 			transaction_trace_id,
 			message,
 			transaction_reference_id,
-			orderReference,
 			status,
 		},
 	} = req;
 	const payment_reference = trace_id || transaction_trace_id;
-	const donation_id = Number(
-		reference_id || transaction_reference_id || orderReference
-	);
+	const donation_id = Number(reference_id || transaction_reference_id);
 
 	const getQuery = (status) => {
 		if (status) {
@@ -144,7 +140,7 @@ app.post("/api/process-payment", (req, res) => {
 		gateway_payment_method = "${domain}",
 		payment_date = "${date}",
 		updated_at = "${date}",
-		payment_status = 1
+		payment_status ="1"
 		WHERE donation_id="${donation_id}"
 	`;
 		}
@@ -156,7 +152,7 @@ app.post("/api/process-payment", (req, res) => {
 		gateway_payment_method = "${domain}",
 		payment_date = "${date}",
 		updated_at = "${date}",
-		payment_status = -1
+		payment_status = "-1"
 		WHERE donation_id="${donation_id}"
 	`;
 	};
