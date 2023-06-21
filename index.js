@@ -120,7 +120,7 @@ app.post("/api/process-payment", (req, res) => {
 			bill_reference_id,
 			amount,
 			trace_id,
-			domain,
+			gateway,
 			transaction_trace_id,
 			message,
 			transaction_reference_id,
@@ -137,7 +137,7 @@ app.post("/api/process-payment", (req, res) => {
 		payment_body = "${message}",
 		amount = "${amount}",
 		payment_reference="${payment_reference}",
-		gateway_payment_method = "${domain}",
+		gateway_payment_method = "${gateway}",
 		payment_date = "${date}",
 		updated_at = "${date}",
 		payment_status ="1"
@@ -149,7 +149,7 @@ app.post("/api/process-payment", (req, res) => {
 		payment_body = "${message}",
 		amount = "${amount}",
 		payment_reference="${payment_reference}",
-		gateway_payment_method = "${domain}",
+		gateway_payment_method = "${gateway}",
 		payment_date = "${date}",
 		updated_at = "${date}",
 		payment_status = "-1"
