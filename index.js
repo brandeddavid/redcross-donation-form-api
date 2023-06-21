@@ -129,6 +129,7 @@ app.post("/api/process-payment", (req, res) => {
 	} = req;
 	const payment_reference = trace_id || transaction_trace_id;
 	const donation_id = Number(reference_id || transaction_reference_id);
+	const gateway_payment_method = gateway || "Failed";
 
 	const getQuery = (status) => {
 		if (status) {
@@ -137,7 +138,7 @@ app.post("/api/process-payment", (req, res) => {
 		payment_body = "${message}",
 		amount = "${amount}",
 		payment_reference="${payment_reference}",
-		gateway_payment_method = "${gateway}",
+		gateway_payment_method = "${gateway_payment_method}",
 		payment_date = "${date}",
 		updated_at = "${date}",
 		payment_status ="1"
@@ -149,7 +150,7 @@ app.post("/api/process-payment", (req, res) => {
 		payment_body = "${message}",
 		amount = "${amount}",
 		payment_reference="${payment_reference}",
-		gateway_payment_method = "${gateway}",
+		gateway_payment_method = "${gateway_payment_method}",
 		payment_date = "${date}",
 		updated_at = "${date}",
 		payment_status = "-1"
