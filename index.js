@@ -94,9 +94,11 @@ app.post("/api/donate", (req, res) => {
 			country,
 			amount,
 			paymentMethod,
+			pledgeFrequency,
 		},
 	} = req;
-	const reminderDay = (paymentMethod === 2 && date.day) || 0;
+	const reminderDay =
+		paymentMethod === 2 && pledgeFrequency === "monthly" ? date.day : 0;
 	const query = `INSERT INTO donation (
 		krc_reference,
 		donor_type,
