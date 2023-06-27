@@ -96,7 +96,46 @@ app.post("/api/donate", (req, res) => {
 			paymentMethod,
 		},
 	} = req;
-	const query = `INSERT INTO donation (krc_reference, donor_type, first_name, last_name, company_name, phone, address, region, country, currency, amount, payment_method, donation_cause, payment_body, payment_reference, gateway_payment_method, updated_at) values ("", "${donorType}", "${firstName}", "${lastName}", "${companyName}", "${phoneNumber}", "${address}", "${county}", "${country}", "${currency}", "${amount}", "${paymentMethod}", "${campaignId}", "", "","", "${date}")`;
+	const reminderDay = (paymentMethod === 2 && date.day) || 0;
+	const query = `INSERT INTO donation (
+		krc_reference,
+		donor_type,
+		first_name,
+		last_name,
+		company_name,
+		phone,
+		address,
+		region,
+		country,
+		currency,
+		amount,
+		payment_method,
+		donation_cause,
+		payment_body,
+		payment_reference,
+		gateway_payment_method,
+		reminder_day,
+		updated_at
+		) 
+		values (
+			"",
+			"${donorType}", 
+			"${firstName}", 
+			"${lastName}", 
+			"${companyName}", 
+			"${phoneNumber}", 
+			"${address}", 
+			"${county}", 
+			"${country}", 
+			"${currency}", 
+			"${amount}", 
+			"${paymentMethod}", 
+			"${campaignId}", 
+			"",
+			"",
+			"",
+			"${reminderDay}", 
+			"${date}")`;
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
