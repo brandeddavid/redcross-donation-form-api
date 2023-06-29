@@ -97,8 +97,10 @@ app.post("/api/donate", (req, res) => {
 			pledgeFrequency,
 		},
 	} = req;
-	const reminderDay =
-		paymentMethod === 2 && pledgeFrequency === "monthly" ? date.day : 0;
+	const reminderDate =
+		paymentMethod === 2 && pledgeFrequency === "monthly"
+			? date.plus({ month: 1 })
+			: 0;
 	const query = `INSERT INTO donation (
 		krc_reference,
 		donor_type,
@@ -116,7 +118,7 @@ app.post("/api/donate", (req, res) => {
 		payment_body,
 		payment_reference,
 		gateway_payment_method,
-		reminder_day,
+		reminder_date,
 		updated_at
 		) 
 		values (
@@ -136,7 +138,7 @@ app.post("/api/donate", (req, res) => {
 			"",
 			"",
 			"",
-			"${reminderDay}", 
+			"${reminderDate}", 
 			"${date}")`;
 
 	pool.getConnection((error, connection) => {
