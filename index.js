@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 
 const corsOptions = {
 	AccessControlAllowOrigin: "*",
-	origin: ["http:localhost:8800", "http://196.43.239.57:8800"],
+	origin: ["http:localhost:8800", "http://52.68.51.77:8800"],
 	methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 	allowedHeaders: [
 		"Accept-Version",
@@ -41,7 +41,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/campaigns", (req, res) => {
-	const query = "SELECT * FROM donation_type WHERE status = 1";
+	const query = "SELECT * FROM campaigns WHERE status = 1";
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
@@ -95,61 +95,128 @@ app.post("/api/donate", (req, res) => {
 			amount,
 			paymentMethod,
 			pledgeFrequency,
+			email,
+			processingFee,
 		},
 	} = req;
+
+	console.log({
+		currency,
+		donorType,
+		campaignId,
+		firstName,
+		lastName,
+		companyName,
+		phoneNumber,
+		address,
+		county,
+		country,
+		amount,
+		paymentMethod,
+		pledgeFrequency,
+		email,
+		processingFee,
+	});
 	const reminderDate =
 		paymentMethod === 2 && pledgeFrequency === "monthly"
 			? date.plus({ month: 1 })
 			: 0;
-	const query = `INSERT INTO donation (
-		krc_reference,
-		donor_type,
+	const donorQuery = `INSERT INTO donors (
 		first_name,
 		last_name,
+		email,
 		company_name,
-		phone,
-		address,
-		region,
+		phone_no,
+		physical_address,
+		county,
 		country,
-		currency,
-		amount,
-		payment_method,
-		donation_cause,
-		payment_body,
-		payment_reference,
-		gateway_payment_method,
-		reminder_date,
-		updated_at
+		campaign_id,
+		donor_type_id,
+		created_at
 		) 
 		values (
-			"",
-			"${donorType}", 
 			"${firstName}", 
 			"${lastName}", 
+			"${email}", 
 			"${companyName}", 
 			"${phoneNumber}", 
 			"${address}", 
 			"${county}", 
 			"${country}", 
+			"${campaignId}",
+			"${donorType}",
+			"${date}")`;
+
+	const query = `INSERT INTO transactions (
+		donor_id,
+		currency_id,
+		amount,
+		payment_method_id,
+		payment_reference,
+		gateway,
+		campaign_id,
+		payment_date,
+		status,
+		updated_at
+		) 
+		values (
+			"${donorType}",
 			"${currency}", 
 			"${amount}", 
 			"${paymentMethod}", 
-			"${campaignId}", 
 			"",
 			"",
-			"",
-			"${reminderDate}", 
+			"${campaignId}",
+			"${date}",
+			"0",
 			"${date}")`;
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
+
+		connection.query(donorQuery, (error, data) => {
+			if (error) {
+				return res.json(error);
+			}
+
+			// return res.json({ donorId: data.insertId });
+		});
 
 		connection.query(query, (error, data) => {
 			if (error) {
 				return res.json(error);
 			}
 
-			return res.json({ donationId: data.insertId });
+			const donationId = data.insertId;
+
+			const commissionQuery = `INSERT INTO commissions (
+				donor,
+				campaign,
+				donationAmount,
+				commission,
+				paymentMethod,
+				status,
+				donationId,
+				createdOn
+				) 
+				values (
+					"${firstName} ${lastName}", 
+					"${campaignId}",
+					"${amount}", 
+					"${processingFee}", 
+					"${paymentMethod}", 
+					"0",
+					"${donationId}",
+					"${date}")`;
+
+			processingFee &&
+				connection.query(commissionQuery, (error, data) => {
+					if (error) {
+						return res.json(error);
+					}
+				});
+
+			return res.json({ donationId });
 		});
 
 		connection.release();
@@ -174,7 +241,7 @@ app.post("/api/process-payment", (req, res) => {
 	const donation_id = Number(reference_id || transaction_reference_id);
 	const gateway_payment_method = gateway || "Failed";
 
-	const getQuery = (status) => {
+	const getUpdateDonationQuery = (status) => {
 		if (status) {
 			return `UPDATE donation SET 
 		krc_reference = "${bill_reference_id}",
@@ -201,17 +268,37 @@ app.post("/api/process-payment", (req, res) => {
 	`;
 	};
 
-	const query = getQuery(status);
+	const getUpdateCommissionsQuery = (status) => {
+		if (status) {
+			return `UPDATE commissions SET 
+		status ="1"
+		WHERE donationId="${donation_id}"
+	`;
+		}
+		return `UPDATE commissions SET 
+		payment_status = "-1"
+		WHERE donationId="${donation_id}"
+	`;
+	};
+
+	const updateDonationQuery = getUpdateDonationQuery(status);
+	const updateCommissionsQuery = getUpdateCommissionsQuery(status);
 
 	pool.getConnection((error, connection) => {
 		if (error) throw error;
 
-		connection.query(query, (error, data) => {
+		connection.query(updateDonationQuery, (error, data) => {
 			if (error) {
 				return res.json(error);
 			}
 
 			return res.json(data);
+		});
+
+		connection.query(updateCommissionsQuery, (error, data) => {
+			if (error) {
+				return res.json(error);
+			}
 		});
 
 		connection.release();
